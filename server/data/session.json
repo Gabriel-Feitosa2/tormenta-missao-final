@@ -12,27 +12,27 @@
   "players": [
     {
       "id": "player-1",
-      "name": "Jogador 1",
+      "name": "Aragão",
       "characterName": "Personagem 1"
     },
     {
       "id": "player-2",
-      "name": "Jogador 2",
+      "name": "Ju",
       "characterName": "Personagem 2"
     },
     {
       "id": "player-3",
-      "name": "Jogador 3",
+      "name": "Zelele",
       "characterName": "Personagem 3"
     },
     {
       "id": "player-4",
-      "name": "Jogador 4",
+      "name": "Brunão",
       "characterName": "Personagem 4"
     },
     {
       "id": "player-5",
-      "name": "Jogador 5",
+      "name": "Myu",
       "characterName": "Personagem 5"
     }
   ],
