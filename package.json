@@ -1,0 +1,23 @@
+{
+  "name": "tormenta-missao-final",
+  "version": "1.0.0",
+  "description": "Painel de controle em tempo real para a Missão Final de Tormenta 20 - Sistema de Parceiros",
+  "main": "server/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/server.js",
+    "server": "node server/server.js",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"node server/server.js\" \"npm run dev --prefix client\"",
+    "build": "npm install --prefix client && npm run build --prefix client"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.4"
+  }
+}

@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tormenta 20 - Protótipos de Design de NPCs</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
+    
+    .font-medieval {
+      font-family: 'Cinzel', Georgia, serif;
+    }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+    }
+    .medieval-gradient-border {
+      box-shadow: 0 0 25px rgba(185, 28, 28, 0.25), inset 0 0 15px rgba(0, 0, 0, 0.8);
+    }
+    .gold-foil {
+      background: linear-gradient(135deg, #fef08a 0%, #d97706 50%, #78350f 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+<body class="bg-[#0b0406] text-gray-100 min-h-screen p-4 sm:p-8 antialiased">
+  
+  <!-- Header Bar -->
+  <header class="max-w-7xl mx-auto mb-8 border-b-2 border-red-900/60 pb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">⚔️</span>
+          <h1 class="text-2xl sm:text-3xl font-black font-medieval text-white tracking-wider">
+            Tormenta 20 • Escolha de Design dos Parceiros
+          </h1>
+        </div>
+        <p class="text-sm text-red-300/90 mt-1 font-medium">
+          5 protótipos de cards e retratos de NPCs para a Missão Final. Teste a interatividade e escolha o seu preferido!
+        </p>
+      </div>
+
+      <!-- Controls & Simulator Toggles -->
+      <div class="flex flex-wrap items-center gap-3 bg-[#18060c] p-3 rounded-xl border border-red-800/80 shadow-lg">
+        <!-- Status Switcher -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Simular Status:</label>
+          <div class="flex gap-1" id="status-buttons">
+            <button onclick="setStatus('alive', false)" class="status-btn px-2.5 py-1 rounded text-xs font-bold bg-emerald-950 border border-emerald-500 text-emerald-300">Ativo</button>
+            <button onclick="setStatus('alive', true)" class="status-btn px-2.5 py-1 rounded text-xs font-bold bg-red-950 border border-red-500 text-red-300">Ordem</button>
+            <button onclick="setStatus('wounded', false)" class="status-btn px-2.5 py-1 rounded text-xs font-bold bg-amber-950 border border-amber-500 text-amber-300">Ferido</button>
+            <button onclick="setStatus('withdrawn', false)" class="status-btn px-2.5 py-1 rounded text-xs font-bold bg-blue-950 border border-blue-500 text-blue-300">Salvo</button>
+            <button onclick="setStatus('dead', false)" class="status-btn px-2.5 py-1 rounded text-xs font-bold bg-stone-900 border border-red-800 text-red-500">Morto</button>
+          </div>
+        </div>
+
+        <!-- NPC Switcher -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Personagem Modelo:</label>
+          <select id="npc-select" onchange="changeNpc(this.value)" class="bg-black border border-red-700 text-amber-300 text-xs rounded px-2.5 py-1 font-semibold focus:outline-none">
+            <option value="asora">Asora (Ataque Furtivo / Aço Rubi)</option>
+            <option value="borus">Borus* (Lobisomem / Íntimo)</option>
+            <option value="lonien">Lonien (Curador / Regeneração)</option>
+            <option value="masaru">Masaru (Imune à Tormenta)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- View Mode Switcher -->
+    <div class="flex flex-wrap items-center gap-2 mt-6">
+      <span class="text-xs font-bold uppercase text-gray-400 mr-1">Exibição:</span>
+      <button onclick="setViewMode('all')" id="tab-all" class="view-tab px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-red-700 text-white shadow-lg border border-red-400">
+        Ver Todos Lado a Lado (5 Protótipos)
+      </button>
+      <button onclick="setViewMode(1)" id="tab-1" class="view-tab px-3.5 py-1.5 rounded-lg text-xs font-bold bg-black/60 text-gray-300 hover:text-white border border-red-950">
+        #1 Hero Banner
+      </button>
+      <button onclick="setViewMode(2)" id="tab-2" class="view-tab px-3.5 py-1.5 rounded-lg text-xs font-bold bg-black/60 text-gray-300 hover:text-white border border-red-950">
+        #2 Retrato Vertical Gótico
+      </button>
+      <button onclick="setViewMode(3)" id="tab-3" class="view-tab px-3.5 py-1.5 rounded-lg text-xs font-bold bg-black/60 text-gray-300 hover:text-white border border-red-950">
+        #3 Medalhão Flutuante
+      </button>
+      <button onclick="setViewMode(4)" id="tab-4" class="view-tab px-3.5 py-1.5 rounded-lg text-xs font-bold bg-black/60 text-gray-300 hover:text-white border border-red-950">
+        #4 Tarô de Arton
+      </button>
+      <button onclick="setViewMode(5)" id="tab-5" class="view-tab px-3.5 py-1.5 rounded-lg text-xs font-bold bg-black/60 text-gray-300 hover:text-white border border-red-950">
+        #5 Tactical HUD
+      </button>
+    </div>
+  </header>
+
+  <!-- Prototypes Container -->
+  <main class="max-w-7xl mx-auto">
+    <div id="grid-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 items-start">
+
+      <!-- ========================================================================= -->
+      <!-- PROTÓTIPO 1: HERO BANNER (Retrato Superior Panorâmico) -->
+      <!-- ========================================================================= -->
+      <section id="proto-1" class="proto-card bg-[#14060b] border-2 border-red-800/80 rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-red-500">
+        <div class="bg-red-950/80 px-4 py-2 border-b border-red-800 flex items-center justify-between">
+          <span class="text-xs font-medieval font-black text-amber-300 uppercase tracking-wider">Protótipo 1: Hero Banner</span>
+          <span class="text-[11px] text-gray-300 bg-black/60 px-2 py-0.5 rounded font-mono font-bold">Arte Panorâmica Superior</span>
+        </div>
+
+        <!-- Dynamic Card 1 Content -->
+        <div class="p-1">
+          <div id="card-1-container" class="rounded-xl border-2 overflow-hidden bg-[#1a070e] transition-all">
+            
+            <!-- Top Hero Banner (140px height with dark gradient overlay) -->
+            <div class="relative h-36 w-full overflow-hidden bg-gradient-to-t from-[#1a070e] via-black/40 to-transparent">
+              <img id="img-1" src="" alt="" class="w-full h-full object-cover object-top transition-transform duration-500 hover:scale-105" />
+              
+              <!-- Gradient Overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-[#1a070e] via-[#1a070e]/40 to-transparent"></div>
+
+              <!-- Top Tags -->
+              <div class="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="px-2 py-0.5 bg-red-950/90 border border-red-500 text-red-200 text-[10px] font-bold uppercase rounded shadow">
+                    ⚔️ Aço Rubi
+                  </span>
+                  <span id="badge-intimate-1" class="px-2 py-0.5 bg-amber-950/90 border border-amber-400 text-amber-300 text-[10px] font-bold uppercase rounded shadow">
+                    ★ Íntimo
+                  </span>
+                  <span id="badge-healer-1" class="px-2 py-0.5 bg-emerald-950/90 border border-emerald-400 text-emerald-300 text-[10px] font-bold uppercase rounded shadow">
+                    💚 Curador
+                  </span>
+                </div>
+                <div id="status-badge-1"></div>
+              </div>
+
+              <!-- Character Name & Vontade Banner Overlaid at Bottom of Image -->
+              <div class="absolute bottom-2 left-3 right-3 flex items-end justify-between">
+                <div>
+                  <h3 id="name-1" class="font-medieval font-black text-2xl text-white tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]"></h3>
+                  <span class="text-[11px] text-red-200 font-semibold drop-shadow">(ignora RD de Lefeu)</span>
+                </div>
+                <div class="text-right bg-black/80 px-3 py-1 rounded-lg border border-red-700 shadow-xl backdrop-blur-sm">
+                  <span class="text-[10px] text-gray-300 uppercase font-bold block leading-none">Vontade</span>
+                  <span id="will-1" class="font-mono font-black text-lg text-amber-300"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-4 pt-3 space-y-3">
+              <!-- Corruption Bar -->
+              <div class="bg-black/60 rounded-lg p-2 border border-red-950 flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-300 uppercase">Falhas de Vontade:</span>
+                <div class="flex items-center gap-1.5" id="failures-1"></div>
+              </div>
+
+              <!-- Bonus Box -->
+              <div class="bg-black/70 p-3 rounded-lg border border-red-900/60 min-h-[60px]">
+                <strong class="text-xs font-medieval font-bold text-amber-300 uppercase tracking-wider block mb-1">Bônus de Parceiro:</strong>
+                <p id="bonus-1" class="text-xs text-gray-200 leading-relaxed font-medium"></p>
+              </div>
+
+              <!-- Action Bar -->
+              <div class="pt-1 flex items-center justify-between gap-2 border-t border-red-950">
+                <label id="order-label-1" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer select-none">
+                  <input type="checkbox" id="order-check-1" class="w-4 h-4 accent-red-600" />
+                  <span id="order-text-1">Dar Ordem</span>
+                </label>
+                <div class="flex items-center gap-2">
+                  <button id="attack-btn-1" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 text-white shadow flex items-center gap-1.5"></button>
+                  <button class="p-2 rounded-lg bg-black/60 text-gray-300 hover:text-amber-300 border border-red-950 hover:border-amber-600" title="Passar Parceiro">🔄</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Prototype Description & Vote -->
+        <div class="p-4 bg-[#0e0407] border-t border-red-900 text-xs text-gray-300 space-y-2">
+          <p><strong>Destaques:</strong> A arte é o ponto focal máximo no topo estilo <em>Magic / Hearthstone</em>, com nome imersivo sobreposto. Grande impacto visual.</p>
+        </div>
+      </section>
+
+
+      <!-- ========================================================================= -->
+      <!-- PROTÓTIPO 2: RETRATO VERTICAL GÓTICO (3:4 à Esquerda) -->
+      <!-- ========================================================================= -->
+      <section id="proto-2" class="proto-card bg-[#14060b] border-2 border-red-800/80 rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-red-500">
+        <div class="bg-red-950/80 px-4 py-2 border-b border-red-800 flex items-center justify-between">
+          <span class="text-xs font-medieval font-black text-amber-300 uppercase tracking-wider">Protótipo 2: Retrato Gótico</span>
+          <span class="text-[11px] text-gray-300 bg-black/60 px-2 py-0.5 rounded font-mono font-bold">Retrato 3:4 Proporcional</span>
+        </div>
+
+        <div class="p-1">
+          <div id="card-2-container" class="rounded-xl border-2 p-4 bg-[#1a070e] transition-all space-y-3">
+            
+            <!-- Side-by-Side: Portrait 3:4 on Left + Info on Right -->
+            <div class="flex items-start gap-4">
+              <!-- 3:4 Gothic Portrait Frame -->
+              <div class="relative shrink-0 w-24 h-32 rounded-lg overflow-hidden border-2 border-red-700 shadow-[0_0_15px_rgba(0,0,0,0.8)] bg-black ring-1 ring-amber-500/40">
+                <img id="img-2" src="" alt="" class="w-full h-full object-cover object-top" />
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/40 to-transparent h-8"></div>
+                <!-- Status icon corner -->
+                <div id="portrait-status-2" class="absolute bottom-1 right-1"></div>
+              </div>
+
+              <!-- Right Info Block -->
+              <div class="flex-1 min-w-0 space-y-2">
+                <div class="flex items-start justify-between gap-1">
+                  <div>
+                    <h3 id="name-2" class="font-medieval font-black text-xl text-white truncate"></h3>
+                    <div class="flex items-center gap-1.5 flex-wrap mt-0.5">
+                      <span class="px-1.5 py-0.5 bg-red-950 border border-red-500 text-red-200 text-[10px] font-bold rounded">
+                        ⚔️ Aço Rubi
+                      </span>
+                      <span id="badge-intimate-2" class="px-1.5 py-0.5 bg-amber-950 border border-amber-400 text-amber-300 text-[10px] font-bold rounded">
+                        ★ Íntimo
+                      </span>
+                    </div>
+                  </div>
+                  <div id="status-badge-2"></div>
+                </div>
+
+                <!-- Vontade & Corruption in Compact Pill Grid -->
+                <div class="grid grid-cols-2 gap-1.5 pt-1">
+                  <div class="bg-black/70 p-1.5 rounded border border-red-900/80 text-center">
+                    <span class="text-[9px] uppercase font-bold text-gray-400 block leading-none">Vontade</span>
+                    <span id="will-2" class="font-mono font-black text-sm text-amber-300"></span>
+                  </div>
+                  <div class="bg-black/70 p-1.5 rounded border border-red-900/80 text-center">
+                    <span class="text-[9px] uppercase font-bold text-gray-400 block leading-none">Falhas</span>
+                    <span id="will-failures-num-2" class="font-mono font-black text-sm text-red-400"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bonus Box -->
+            <div class="bg-black/70 p-3 rounded-lg border border-red-900/60 min-h-[58px]">
+              <strong class="text-xs font-medieval font-bold text-amber-300 uppercase tracking-wider block mb-1">Bônus de Parceiro:</strong>
+              <p id="bonus-2" class="text-xs text-gray-200 leading-relaxed font-medium"></p>
+            </div>
+
+            <!-- Actions -->
+            <div class="pt-2 flex items-center justify-between gap-2 border-t border-red-950">
+              <label id="order-label-2" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer select-none">
+                <input type="checkbox" id="order-check-2" class="w-4 h-4 accent-red-600" />
+                <span id="order-text-2">Dar Ordem</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <button id="attack-btn-2" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-red-800 to-red-600 text-white shadow"></button>
+                <button class="p-2 rounded-lg bg-black/60 text-gray-300 hover:text-amber-300 border border-red-950 hover:border-amber-600">🔄</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="p-4 bg-[#0e0407] border-t border-red-900 text-xs text-gray-300 space-y-2">
+          <p><strong>Destaques:</strong> Retrato vertical clássico de RPG (proporção 3:4 como *Baldur's Gate* / *Pathfinder*). O rosto e a postura do NPC ficam nítidos e elegantes.</p>
+        </div>
+      </section>
+
+
+      <!-- ========================================================================= -->
+      <!-- PROTÓTIPO 3: MEDALHÃO RÚNICO FLUTUANTE (Token 3D de 80px) -->
+      <!-- ========================================================================= -->
+      <section id="proto-3" class="proto-card bg-[#14060b] border-2 border-red-800/80 rounded-2xl overflow-visible shadow-2xl transition-all duration-300 hover:border-red-500 pt-6">
+        <div class="bg-red-950/80 px-4 py-2 border-b border-red-800 flex items-center justify-between -mt-6 rounded-t-2xl">
+          <span class="text-xs font-medieval font-black text-amber-300 uppercase tracking-wider">Protótipo 3: Medalhão Rúnico</span>
+          <span class="text-[11px] text-gray-300 bg-black/60 px-2 py-0.5 rounded font-mono font-bold">Token Ouro & Rubi 80px</span>
+        </div>
+
+        <div class="p-1">
+          <div id="card-3-container" class="rounded-xl border-2 p-4 pt-5 bg-[#1a070e] transition-all space-y-3 relative">
+            
+            <!-- Floating Medallion on Top Left -->
+            <div class="flex items-center gap-4">
+              <!-- 80px Medallion -->
+              <div class="relative shrink-0 w-20 h-20 rounded-full border-4 border-amber-600/90 shadow-[0_0_20px_rgba(217,119,6,0.5)] bg-black ring-2 ring-red-950 overflow-hidden">
+                <img id="img-3" src="" alt="" class="w-full h-full object-cover object-top" />
+                <div class="absolute inset-0 rounded-full border-2 border-amber-400/40 pointer-events-none"></div>
+              </div>
+
+              <!-- Name & Badges Beside Token -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h3 id="name-3" class="font-medieval font-black text-xl text-white truncate"></h3>
+                    <div class="flex items-center gap-1.5 flex-wrap mt-0.5">
+                      <span class="px-2 py-0.5 bg-red-950 border border-red-500 text-red-200 text-[10px] font-bold rounded">
+                        ⚔️ Aço Rubi
+                      </span>
+                      <span id="badge-healer-3" class="px-2 py-0.5 bg-emerald-950 border border-emerald-400 text-emerald-300 text-[10px] font-bold rounded">
+                        Curador
+                      </span>
+                    </div>
+                  </div>
+                  <div id="status-badge-3"></div>
+                </div>
+
+                <div class="flex items-center gap-3 mt-2 text-xs">
+                  <span class="text-gray-400">Vontade: <strong id="will-3" class="text-amber-300 font-mono text-sm font-black"></strong></span>
+                  <span class="text-gray-400">Falhas: <strong id="will-failures-num-3" class="text-red-400 font-mono text-sm"></strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bonus Box -->
+            <div class="bg-black/70 p-3 rounded-lg border border-red-900/60 min-h-[58px]">
+              <strong class="text-xs font-medieval font-bold text-amber-300 uppercase tracking-wider block mb-1">Bônus de Parceiro:</strong>
+              <p id="bonus-3" class="text-xs text-gray-200 leading-relaxed font-medium"></p>
+            </div>
+
+            <!-- Actions -->
+            <div class="pt-2 flex items-center justify-between gap-2 border-t border-red-950">
+              <label id="order-label-3" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer select-none">
+                <input type="checkbox" id="order-check-3" class="w-4 h-4 accent-red-600" />
+                <span id="order-text-3">Dar Ordem</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <button id="attack-btn-3" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-red-800 to-red-600 text-white shadow"></button>
+                <button class="p-2 rounded-lg bg-black/60 text-gray-300 hover:text-amber-300 border border-red-950 hover:border-amber-600">🔄</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="p-4 bg-[#0e0407] border-t border-red-900 text-xs text-gray-300 space-y-2">
+          <p><strong>Destaques:</strong> Token circular de 80px com aro dourado envelhecido e brilho de joia. Tem o aspecto clássico de VTT de luxo, muito agradável e limpo.</p>
+        </div>
+      </section>
+
+
+      <!-- ========================================================================= -->
+      <!-- PROTÓTIPO 4: TARÔ DE ARTON (Carta Vertical em Arco Ogival) -->
+      <!-- ========================================================================= -->
+      <section id="proto-4" class="proto-card bg-[#14060b] border-2 border-red-800/80 rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-red-500">
+        <div class="bg-red-950/80 px-4 py-2 border-b border-red-800 flex items-center justify-between">
+          <span class="text-xs font-medieval font-black text-amber-300 uppercase tracking-wider">Protótipo 4: Tarô de Arton</span>
+          <span class="text-[11px] text-gray-300 bg-black/60 px-2 py-0.5 rounded font-mono font-bold">Carta Vertical de Mesa</span>
+        </div>
+
+        <div class="p-1">
+          <div id="card-4-container" class="rounded-xl border-2 p-3 bg-[#18060d] transition-all space-y-3">
+            
+            <!-- Arched Gothic Frame Top (170px height) -->
+            <div class="relative h-44 w-full rounded-t-3xl rounded-b-lg overflow-hidden border-2 border-amber-600/70 shadow-inner bg-black">
+              <img id="img-4" src="" alt="" class="w-full h-full object-cover object-top" />
+              
+              <!-- Dark gradient vignette inside arch -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30"></div>
+              
+              <!-- Floating Corner Badges -->
+              <div class="absolute top-2 left-3 right-3 flex items-center justify-between">
+                <span class="px-2 py-0.5 bg-black/80 border border-amber-500/80 text-amber-300 text-[10px] font-bold rounded">
+                  ⚔️ Aço Rubi
+                </span>
+                <div id="status-badge-4"></div>
+              </div>
+
+              <!-- Arch Bottom Name Ribbon -->
+              <div class="absolute bottom-2 inset-x-3 text-center">
+                <span id="name-4" class="inline-block px-4 py-1 bg-gradient-to-r from-red-950 via-black to-red-950 border border-amber-500 rounded-lg font-medieval font-black text-lg text-amber-200 tracking-wider shadow-lg"></span>
+              </div>
+            </div>
+
+            <!-- Stats Ribbon: Will, Failures, Attack -->
+            <div class="grid grid-cols-3 gap-1.5 text-center bg-black/80 p-2 rounded-lg border border-red-900/80">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-gray-400 block">Vontade</span>
+                <span id="will-4" class="font-mono font-black text-sm text-amber-300"></span>
+              </div>
+              <div>
+                <span class="text-[9px] uppercase font-bold text-gray-400 block">Falhas</span>
+                <span id="will-failures-num-4" class="font-mono font-black text-sm text-red-400"></span>
+              </div>
+              <div>
+                <span class="text-[9px] uppercase font-bold text-gray-400 block">Ataque</span>
+                <span id="attack-stat-4" class="font-mono font-bold text-xs text-white"></span>
+              </div>
+            </div>
+
+            <!-- Bonus Box -->
+            <div class="bg-black/70 p-2.5 rounded-lg border border-red-950 text-xs min-h-[50px]">
+              <strong class="text-amber-300 font-bold block mb-0.5">Bônus:</strong>
+              <p id="bonus-4" class="text-gray-200 text-[11px] leading-relaxed"></p>
+            </div>
+
+            <!-- Full-width Action Button -->
+            <div class="pt-1 flex items-center gap-2">
+              <label id="order-label-4" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold cursor-pointer select-none">
+                <input type="checkbox" id="order-check-4" class="w-4 h-4 accent-red-600" />
+                <span id="order-text-4">Dar Ordem</span>
+              </label>
+              <button id="attack-btn-4" class="px-3 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-red-800 to-red-600 text-white shadow">Atacar</button>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="p-4 bg-[#0e0407] border-t border-red-900 text-xs text-gray-300 space-y-2">
+          <p><strong>Destaques:</strong> Formato físico de carta de Tarô com arco ogival superior. É a opção mais temática e de fantasia sombria para quem adora a atmosfera de RPG de mesa.</p>
+        </div>
+      </section>
+
+
+      <!-- ========================================================================= -->
+      <!-- PROTÓTIPO 5: TACTICAL HUD (Moderno Medieval - Combate Rápido) -->
+      <!-- ========================================================================= -->
+      <section id="proto-5" class="proto-card bg-[#14060b] border-2 border-red-800/80 rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-red-500">
+        <div class="bg-red-950/80 px-4 py-2 border-b border-red-800 flex items-center justify-between">
+          <span class="text-xs font-medieval font-black text-amber-300 uppercase tracking-wider">Protótipo 5: Tactical HUD</span>
+          <span class="text-[11px] text-gray-300 bg-black/60 px-2 py-0.5 rounded font-mono font-bold">Foco em Combate Ágil</span>
+        </div>
+
+        <div class="p-1">
+          <div id="card-5-container" class="rounded-xl border-2 p-4 bg-[#1a070e] transition-all space-y-3">
+            
+            <!-- Header Row: Squircle 72px Avatar + Giant Vontade Box -->
+            <div class="flex items-center gap-3.5">
+              <!-- 72px Squircle Avatar -->
+              <div class="relative shrink-0 w-18 h-18 rounded-xl overflow-hidden border-2 border-red-500 shadow-xl bg-black ring-2 ring-red-950">
+                <img id="img-5" src="" alt="" class="w-full h-full object-cover object-top" />
+              </div>
+
+              <!-- Main Title & Tags -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <h3 id="name-5" class="font-medieval font-black text-xl text-white truncate"></h3>
+                  <div id="status-badge-5"></div>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap mt-1">
+                  <span class="px-2 py-0.5 bg-red-950 border border-red-500 text-red-200 text-[10px] font-bold rounded">
+                    ⚔️ Aço Rubi
+                  </span>
+                  <span id="badge-intimate-5" class="px-2 py-0.5 bg-amber-950 border border-amber-400 text-amber-300 text-[10px] font-bold rounded">
+                    ★ Íntimo
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Big Stat Ribbon: Giant Vontade Counter -->
+            <div class="bg-gradient-to-r from-black via-red-950/60 to-black p-2.5 rounded-lg border-2 border-red-900 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <span class="text-gray-300 text-xs font-bold uppercase">Vontade:</span>
+                <span id="will-5" class="font-mono font-black text-2xl text-amber-300 drop-shadow"></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-gray-400 font-bold uppercase">Corrupção:</span>
+                <div class="flex items-center gap-1" id="failures-5"></div>
+              </div>
+            </div>
+
+            <!-- Bonus Box -->
+            <div class="bg-black/70 p-3 rounded-lg border border-red-900/60 min-h-[58px]">
+              <strong class="text-xs font-medieval font-bold text-amber-300 uppercase tracking-wider block mb-1">Bônus de Parceiro:</strong>
+              <p id="bonus-5" class="text-xs text-gray-200 leading-relaxed font-medium"></p>
+            </div>
+
+            <!-- Actions -->
+            <div class="pt-2 flex items-center justify-between gap-2 border-t border-red-950">
+              <label id="order-label-5" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer select-none">
+                <input type="checkbox" id="order-check-5" class="w-4 h-4 accent-red-600" />
+                <span id="order-text-5">Dar Ordem</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <button id="attack-btn-5" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-red-800 to-red-600 text-white shadow"></button>
+                <button class="p-2 rounded-lg bg-black/60 text-gray-300 hover:text-amber-300 border border-red-950 hover:border-amber-600">🔄</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="p-4 bg-[#0e0407] border-t border-red-900 text-xs text-gray-300 space-y-2">
+          <p><strong>Destaques:</strong> Foco em rapidez tática durante o combate. Números de Vontade e status com legibilidade máxima, avatar quadrado arredondado bem visível.</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Script for Mock Data, Status Simulation and Tab Switching -->
+  <script>
+    const NPC_DATA = {
+      asora: {
+        id: 'asora',
+        name: 'Asora',
+        will: '+10',
+        failures: 1,
+        bonus: '+3d6 de ataque furtivo, seus ataques contam como flanquear o alvo.',
+        attack: '3d6 (cc)',
+        isIntimate: false,
+        isHealer: false,
+        isImmune: false,
+        // Stylized RPG portrait asset or SVG placeholder
+        img: 'https://media.discordapp.net/attachments/1009447163081793587/1533641453383843930/image.png?ex=6aa3fc28&is=6aa2aaa8&hm=b827efba35ba07dba82a33d994bb3f097a4d6f9db4a719df94da6be3548d64c5&=&format=webp&quality=lossless',
+        fallbackInitials: 'AS'
+      },
+      borus: {
+        id: 'borus',
+        name: 'Borus*',
+        will: '+16',
+        failures: 0,
+        bonus: '+2 de ataque. Modo Lobisomem: vira +4 ataque e +2d6 dano cc. Ataque 6d8+6!',
+        attack: '3d8 (cc)',
+        isIntimate: true,
+        isHealer: false,
+        isImmune: false,
+        img: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=400&q=80',
+        fallbackInitials: 'BO'
+      },
+      lonien: {
+        id: 'lonien',
+        name: 'Lonien',
+        will: '+18',
+        failures: 0,
+        bonus: 'Quando o personagem cair a 0 PV, automaticamente regenera 8d8+8 PV.',
+        attack: '2d6 (curto)',
+        isIntimate: false,
+        isHealer: true,
+        isImmune: false,
+        img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+        fallbackInitials: 'LO'
+      },
+      masaru: {
+        id: 'masaru',
+        name: 'Masaru',
+        will: 'IMUNE',
+        failures: 0,
+        bonus: '+3 de ataque e +2 em teste para resistir a qualquer efeito da Tormenta.',
+        attack: '2d8 (cc)',
+        isIntimate: false,
+        isHealer: false,
+        isImmune: true,
+        img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+        fallbackInitials: 'MA'
+      }
+    };
+
+    let currentNpcKey = 'asora';
+    let currentStatus = 'alive';
+    let isUsedRound = false;
+
+    function changeNpc(key) {
+      currentNpcKey = key;
+      renderAll();
+    }
+
+    function setStatus(status, used) {
+      currentStatus = status;
+      isUsedRound = used;
+      
+      // Update buttons highlight
+      document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('ring-2', 'ring-white'));
+      event.target.classList.add('ring-2', 'ring-white');
+
+      renderAll();
+    }
+
+    function setViewMode(mode) {
+      const tabs = ['all', 1, 2, 3, 4, 5];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        if (btn) {
+          if (t === mode) {
+            btn.className = 'view-tab px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-red-700 text-white shadow-lg border border-red-400';
+          } else {
+            btn.className = 'view-tab px-3.5 py-1.5 rounded-lg text-xs font-bold bg-black/60 text-gray-300 hover:text-white border border-red-950';
+          }
+        }
+      });
+
+      const container = document.getElementById('grid-container');
+      const cards = document.querySelectorAll('.proto-card');
+
+      if (mode === 'all') {
+        container.className = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 items-start';
+        cards.forEach(c => c.style.display = 'block');
+      } else {
+        container.className = 'max-w-md mx-auto';
+        cards.forEach((c, idx) => {
+          c.style.display = (idx + 1 === mode) ? 'block' : 'none';
+        });
+      }
+    }
+
+    function renderAll() {
+      const npc = NPC_DATA[currentNpcKey];
+
+      // Styling based on status
+      let cardBorderClass = 'border-red-800/80 bg-[#1c0a11]';
+      let statusBadgeHtml = '';
+
+      if (currentStatus === 'dead') {
+        cardBorderClass = 'border-red-950 bg-[#18060a] opacity-75 grayscale';
+        statusBadgeHtml = '<span class="px-2.5 py-0.5 bg-red-950 border-2 border-red-600 text-red-300 text-[11px] font-black rounded-lg">💀 MORTO</span>';
+      } else if (currentStatus === 'wounded') {
+        cardBorderClass = 'border-amber-500 bg-[#22100a] ring-2 ring-amber-500/60 animate-pulse';
+        statusBadgeHtml = '<span class="px-2.5 py-0.5 bg-amber-950 border-2 border-amber-500 text-amber-200 text-[11px] font-black rounded-lg">⚠️ FERIDO</span>';
+      } else if (currentStatus === 'withdrawn') {
+        cardBorderClass = 'border-blue-500 bg-[#0a141e] ring-1 ring-blue-500/50';
+        statusBadgeHtml = '<span class="px-2.5 py-0.5 bg-blue-950 border-2 border-blue-500 text-blue-200 text-[11px] font-black rounded-lg">🛡️ SALVO</span>';
+      } else if (isUsedRound) {
+        cardBorderClass = 'border-red-500 bg-[#2b0e19] ring-2 ring-red-500/70 shadow-[0_0_20px_rgba(239,68,68,0.5)]';
+        statusBadgeHtml = '<span class="px-2.5 py-0.5 bg-red-950 border-2 border-red-500 text-red-200 text-[11px] font-black rounded-lg">🔥 ORDEM</span>';
+      } else {
+        cardBorderClass = 'border-red-800/80 bg-[#1a070e] hover:border-red-500';
+        statusBadgeHtml = '<span class="px-2.5 py-0.5 bg-emerald-950 border-2 border-emerald-600 text-emerald-300 text-[11px] font-black rounded-lg">✓ ATIVO</span>';
+      }
+
+      // Populate each prototype 1 to 5
+      for (let i = 1; i <= 5; i++) {
+        // Name & image
+        const nameEl = document.getElementById(`name-${i}`);
+        if (nameEl) nameEl.textContent = npc.name;
+
+        const imgEl = document.getElementById(`img-${i}`);
+        if (imgEl) imgEl.src = npc.img;
+
+        const willEl = document.getElementById(`will-${i}`);
+        if (willEl) willEl.textContent = npc.will;
+
+        const bonusEl = document.getElementById(`bonus-${i}`);
+        if (bonusEl) bonusEl.textContent = npc.bonus;
+
+        const attackBtn = document.getElementById(`attack-btn-${i}`);
+        if (attackBtn) attackBtn.innerHTML = `⚔️ ${npc.attack}`;
+
+        const statusBadge = document.getElementById(`status-badge-${i}`);
+        if (statusBadge) statusBadge.innerHTML = statusBadgeHtml;
+
+        // Container classes
+        const container = document.getElementById(`card-${i}-container`);
+        if (container) {
+          container.className = `rounded-xl border-2 transition-all duration-300 ${cardBorderClass}`;
+        }
+
+        // Badges visibility
+        const intimateBadge = document.getElementById(`badge-intimate-${i}`);
+        if (intimateBadge) intimateBadge.style.display = npc.isIntimate ? 'inline-block' : 'none';
+
+        const healerBadge = document.getElementById(`badge-healer-${i}`);
+        if (healerBadge) healerBadge.style.display = npc.isHealer ? 'inline-block' : 'none';
+
+        // Order button style
+        const orderLabel = document.getElementById(`order-label-${i}`);
+        const orderText = document.getElementById(`order-text-${i}`);
+        const orderCheck = document.getElementById(`order-check-${i}`);
+        if (orderLabel && orderText && orderCheck) {
+          orderCheck.checked = isUsedRound;
+          if (isUsedRound) {
+            orderLabel.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer select-none bg-red-800 text-white border border-red-400';
+            orderText.textContent = 'Ordem Dada';
+          } else {
+            orderLabel.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer select-none bg-[#240d16] text-gray-200 border border-red-900';
+            orderText.textContent = 'Dar Ordem';
+          }
+        }
+      }
+
+      // Failures skulls
+      const failHtml = [1, 2, 3].map(n => {
+        const active = currentStatus === 'dead' ? true : (npc.failures >= n);
+        return `<span class="text-sm ${active ? 'text-red-500 drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]' : 'text-gray-600'}">💀</span>`;
+      }).join('');
+      
+      const f1 = document.getElementById('failures-1');
+      if (f1) f1.innerHTML = failHtml;
+      const f5 = document.getElementById('failures-5');
+      if (f5) f5.innerHTML = failHtml;
+
+      const f2 = document.getElementById('will-failures-num-2');
+      if (f2) f2.textContent = `${currentStatus === 'dead' ? 3 : npc.failures}/3`;
+      const f3 = document.getElementById('will-failures-num-3');
+      if (f3) f3.textContent = `${currentStatus === 'dead' ? 3 : npc.failures}/3`;
+      const f4 = document.getElementById('will-failures-num-4');
+      if (f4) f4.textContent = `${currentStatus === 'dead' ? 3 : npc.failures}/3`;
+
+      const att4 = document.getElementById('attack-stat-4');
+      if (att4) att4.textContent = npc.attack;
+    }
+
+    // Initial render
+    renderAll();
+  </script>
+</body>
+</html>
