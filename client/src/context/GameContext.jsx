@@ -166,9 +166,15 @@ export const GameProvider = ({ children }) => {
     });
   };
 
-  const reviveNpc = (npcId) => {
+  const killNpc = (npcId, reason = 'Decreto do Mestre') => {
     return new Promise((resolve) => {
-      socket.emit('revive_npc', { npcId }, resolve);
+      socket.emit('kill_npc', { npcId, reason }, resolve);
+    });
+  };
+
+  const reviveNpc = (npcId, resetFailures = true) => {
+    return new Promise((resolve) => {
+      socket.emit('revive_npc', { npcId, resetFailures }, resolve);
     });
   };
 
@@ -259,6 +265,7 @@ export const GameProvider = ({ children }) => {
         updateNpcFailures,
         updateNpcAvatar,
         healNpc,
+        killNpc,
         reviveNpc,
         rescueWithHealer,
         rollTurnEndInjury,

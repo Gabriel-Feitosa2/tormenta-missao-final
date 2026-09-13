@@ -238,10 +238,21 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Revive NPC
-  socket.on('revive_npc', ({ npcId }, callback) => {
+  // Kill NPC (Master Command)
+  socket.on('kill_npc', ({ npcId, reason }, callback) => {
     try {
-      stateManager.reviveNpc(npcId);
+      stateManager.killNpc(npcId, reason);
+      io.emit('state_update', stateManager.getState());
+      if (callback) callback({ success: true });
+    } catch (err) {
+      if (callback) callback({ success: false, message: err.message });
+    }
+  });
+
+  // Revive NPC (Master Command)
+  socket.on('revive_npc', ({ npcId, resetFailures }, callback) => {
+    try {
+      stateManager.reviveNpc(npcId, resetFailures !== undefined ? resetFailures : true);
       io.emit('state_update', stateManager.getState());
       if (callback) callback({ success: true });
     } catch (err) {

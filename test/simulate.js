@@ -109,6 +109,19 @@ async function runTest() {
     throw new Error('Parceiros não usados deveriam ser elegíveis para ferimento!');
   }
 
+  // 10. Teste Mestre: Matar e Reviver NPC automaticamente
+  const killedNpc = stateManager.killNpc('borus', 'Golpe Mortal da Tormenta');
+  console.log(`✓ Mestre matou NPC automaticamente: ${killedNpc.name} (Status: ${killedNpc.status}, Falhas: ${killedNpc.willFailures})`);
+  if (killedNpc.status !== 'dead' || killedNpc.willFailures !== 3) {
+    throw new Error('Falha ao matar NPC automaticamente pelo Mestre!');
+  }
+
+  const revivedNpc = stateManager.reviveNpc('borus', true);
+  console.log(`✓ Mestre reviveu NPC automaticamente: ${revivedNpc.name} (Status: ${revivedNpc.status}, Falhas: ${revivedNpc.willFailures})`);
+  if (revivedNpc.status !== 'alive' || revivedNpc.willFailures !== 0) {
+    throw new Error('Falha ao reviver NPC automaticamente pelo Mestre!');
+  }
+
   console.log('=== TODOS OS TESTES PASSARAM COM 100% DE SUCESSO! ===');
   process.exit(0);
 }

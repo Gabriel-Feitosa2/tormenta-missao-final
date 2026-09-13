@@ -26,6 +26,7 @@ export const NpcCard = ({
     toggleNpcUsed,
     rollNpcAttack,
     healNpc,
+    killNpc,
     reviveNpc,
     updateNpcFailures,
     updateNpcAvatar,
@@ -87,8 +88,16 @@ export const NpcCard = ({
     await healNpc(npc.id, currentUser ? `${currentUser.name} (Curativo/Magia)` : 'Curativo');
   };
 
+  const handleKill = async () => {
+    if (!isMaster) return;
+    if (window.confirm(`Mestre: Tem certeza que deseja MATAR o parceiro ${npc.name}?`)) {
+      await killNpc(npc.id, 'Decreto do Mestre');
+    }
+  };
+
   const handleRevive = async () => {
-    await reviveNpc(npc.id);
+    if (!isMaster) return;
+    await reviveNpc(npc.id, true);
   };
 
   const isDead = npc.status === 'dead' || npc.willFailures >= 3;
@@ -175,8 +184,8 @@ export const NpcCard = ({
                 </span>
               </div>
 
-              {/* Status Badge */}
-              <div className="shrink-0">
+              {/* Status Badge & Master Quick Action */}
+              <div className="flex items-center gap-1.5 shrink-0">
                 {isDead ? (
                   <span className="px-2 py-0.5 bg-red-950/90 border border-red-600 text-red-300 text-[10px] font-black rounded-md flex items-center gap-1 shadow">
                     <Skull className="w-3 h-3 text-red-500" /> MORTO
@@ -193,6 +202,25 @@ export const NpcCard = ({
                   <span className="px-2 py-0.5 bg-emerald-950/90 border border-emerald-600 text-emerald-300 text-[10px] font-black rounded-md flex items-center gap-1 shadow">
                     <CheckCircle2 className="w-3 h-3 text-emerald-400" /> ATIVO
                   </span>
+                )}
+
+                {/* Master Quick Kill / Revive Button */}
+                {isMaster && (
+                  <button
+                    onClick={isDead ? handleRevive : handleKill}
+                    className={`p-1 rounded-md border text-xs shadow transition-all cursor-pointer ${
+                      isDead
+                        ? 'bg-emerald-950/90 hover:bg-emerald-800 border-emerald-500 text-emerald-300'
+                        : 'bg-red-950/90 hover:bg-red-900 border-red-600 text-red-400 hover:text-white'
+                    }`}
+                    title={
+                      isDead
+                        ? `Reviver ${npc.name} automaticamente (Mestre)`
+                        : `Matar ${npc.name} automaticamente (Mestre)`
+                    }
+                  >
+                    {isDead ? <Sparkles className="w-3.5 h-3.5" /> : <Skull className="w-3.5 h-3.5" />}
+                  </button>
                 )}
               </div>
             </div>
@@ -361,16 +389,30 @@ export const NpcCard = ({
                 <span>Curar</span>
               </button>
             </div>
-          ) : isDead && isMaster ? (
-            <button
-              onClick={handleRevive}
-              className="px-3.5 py-1.5 bg-purple-950 hover:bg-purple-900 border-2 border-purple-500 text-purple-100 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-lg"
-              title="Ressuscitar parceiro (Controle de Mestre)"
-            >
-              <Sparkles className="w-4 h-4 text-purple-300" />
-              <span>Reviver</span>
-            </button>
           ) : null}
+
+          {/* Master Kill / Revive Buttons in Action Footer */}
+          {isMaster && (
+            isDead ? (
+              <button
+                onClick={handleRevive}
+                className="px-3.5 py-1.5 bg-emerald-950 hover:bg-emerald-900 border-2 border-emerald-500 text-emerald-100 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-lg transition-all cursor-pointer"
+                title="Reviver parceiro automaticamente e zerar falhas (Controle de Mestre)"
+              >
+                <Sparkles className="w-4 h-4 text-emerald-300" />
+                <span>Reviver (Mestre)</span>
+              </button>
+            ) : (
+              <button
+                onClick={handleKill}
+                className="px-2.5 py-1.5 bg-red-950/90 hover:bg-red-900 border-2 border-red-600/90 text-red-300 hover:text-white text-xs font-bold rounded-lg flex items-center gap-1 shadow transition-all cursor-pointer"
+                title="Matar este parceiro automaticamente (Controle de Mestre)"
+              >
+                <Skull className="w-3.5 h-3.5 text-red-400" />
+                <span>Matar</span>
+              </button>
+            )
+          )}
         </div>
 
         {/* Right: Attack button and Special Modals */}

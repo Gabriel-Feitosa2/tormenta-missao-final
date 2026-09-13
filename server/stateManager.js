@@ -556,18 +556,42 @@ class StateManager {
     return npc;
   }
 
-  reviveNpc(npcId) {
+  killNpc(npcId, reason = "Decreto do Mestre") {
+    const npc = this.state.npcs[npcId];
+    if (!npc) throw new Error("NPC não encontrado.");
+
+    npc.status = "dead";
+    npc.willFailures = 3;
+    npc.usedThisRound = false;
+
+    this.addLog({
+      type: "damage",
+      severity: "danger",
+      title: "Morte de Parceiro (Mestre)",
+      message: `${npc.name} foi morto automaticamente pelo Mestre (${reason}).`,
+    });
+
+    this.save();
+    return npc;
+  }
+
+  reviveNpc(npcId, resetFailures = true) {
     const npc = this.state.npcs[npcId];
     if (!npc) throw new Error("NPC não encontrado.");
 
     npc.status = "alive";
-    npc.willFailures = Math.min(2, npc.willFailures);
+    if (resetFailures) {
+      npc.willFailures = 0;
+    } else {
+      npc.willFailures = Math.min(2, npc.willFailures);
+    }
+    npc.usedThisRound = false;
 
     this.addLog({
       type: "heal",
       severity: "success",
       title: "Ressurreição / Restauração Divina",
-      message: `${npc.name} foi revivido e suas falhas de Vontade foram reduzidas para ${npc.willFailures}/3.`,
+      message: `${npc.name} foi revivido automaticamente pelo Mestre e está ativo (Falhas: ${npc.willFailures}/3).`,
     });
 
     this.save();
