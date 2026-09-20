@@ -122,6 +122,16 @@ async function runTest() {
     throw new Error('Falha ao reviver NPC automaticamente pelo Mestre!');
   }
 
+  // 11. Teste Mestre: Backup e Restauração de Sessão (Import State)
+  const backupSnapshot = JSON.parse(JSON.stringify(stateManager.getState()));
+  backupSnapshot.combatTurn = 99;
+  backupSnapshot.npcs['borus'].status = 'wounded';
+  const importedResult = stateManager.importState(backupSnapshot);
+  console.log(`✓ Mestre restaurou backup: Turno = #${importedResult.combatTurn}, Borus Status = ${importedResult.npcs['borus'].status}`);
+  if (importedResult.combatTurn !== 99 || importedResult.npcs['borus'].status !== 'wounded') {
+    throw new Error('Falha ao restaurar backup no StateManager!');
+  }
+
   console.log('=== TODOS OS TESTES PASSARAM COM 100% DE SUCESSO! ===');
   process.exit(0);
 }

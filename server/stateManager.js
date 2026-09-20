@@ -167,6 +167,26 @@ class StateManager {
     console.log("[StateManager] Novo estado inicializado e salvo.");
   }
 
+  importState(importedState) {
+    if (!importedState || !importedState.npcs || !importedState.players) {
+      throw new Error("Arquivo de sessão inválido: dados de NPCs ou Jogadores ausentes.");
+    }
+    this.state = {
+      ...this.state,
+      ...importedState,
+      masterPin: this.state?.masterPin || importedState.masterPin || process.env.MASTER_PIN || "tormenta20",
+    };
+    this.refreshAvatarsFromDisk();
+    this.addLog({
+      type: "system",
+      severity: "success",
+      title: "Backup Restaurado",
+      message: "O Mestre restaurou com sucesso os dados da sessão a partir de um arquivo de backup.",
+    });
+    this.save();
+    return this.state;
+  }
+
   refreshAvatarsFromDisk() {
     const publicNpcs = path.join(__dirname, "..", "client", "public", "npcs");
     if (!fs.existsSync(publicNpcs) || !this.state?.npcs) return;

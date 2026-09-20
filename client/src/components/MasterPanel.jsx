@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useGame } from "../context/GameContext";
 import {
   Crown,
@@ -12,6 +12,8 @@ import {
   Swords,
   Play,
   HeartHandshake,
+  Download,
+  Upload,
 } from "lucide-react";
 import { NpcCard } from "./NpcCard";
 
@@ -30,7 +32,10 @@ export const MasterPanel = ({
     advanceTurn,
     startNewCombat,
     resetSession,
+    importSession,
   } = useGame();
+
+  const fileInputRef = useRef(null);
 
   const [dcInput, setDcInput] = useState(state?.willTestDC || 20);
   const [globalBonusInput, setGlobalBonusInput] = useState(
@@ -100,6 +105,57 @@ export const MasterPanel = ({
     }
   };
 
+  const handleExportBackup = () => {
+    try {
+      const backupData = JSON.stringify(state, null, 2);
+      const blob = new Blob([backupData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const dateStr = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `tormenta_backup_${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Erro ao exportar backup: " + err.message);
+    }
+  };
+
+  const handleImportBackup = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        if (!parsed || !parsed.npcs || !parsed.players) {
+          alert("Arquivo inválido: o arquivo não contém dados de sessão de Tormenta 20.");
+          return;
+        }
+        if (
+          window.confirm(
+            "Atenção: Restaurar este backup substituirá todo o estado atual da mesa. Deseja continuar?",
+          )
+        ) {
+          const res = await importSession(parsed);
+          if (res.success) {
+            alert("Sessão restaurada com sucesso! Todos os dados foram atualizados em tempo real.");
+          } else {
+            alert("Erro ao restaurar: " + (res.message || "Erro desconhecido"));
+          }
+        }
+      } catch (err) {
+        alert("Erro ao ler arquivo de backup: " + err.message);
+      } finally {
+        e.target.value = "";
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const displayedNpcs = allNpcs.filter((npc) => {
     if (selectedPlayerTab === "all") return true;
     if (selectedPlayerTab === "reserve") return !npc.ownerId;
@@ -108,6 +164,15 @@ export const MasterPanel = ({
 
   return (
     <div className="space-y-8">
+      {/* Hidden File Input for Backup Restore */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImportBackup}
+        accept=".json,application/json"
+        className="hidden"
+      />
+
       {/* Top Banner: Master Command Deck */}
       <div className="medieval-panel rounded-xl p-6 sm:p-7 border-2 border-red-700 shadow-2xl relative overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
@@ -125,6 +190,25 @@ export const MasterPanel = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            {/* Backup & Restore Controls */}
+            <button
+              onClick={handleExportBackup}
+              className="px-4 py-2.5 rounded-lg text-xs font-bold bg-[#1e1308] hover:bg-amber-950 border-2 border-amber-600 text-amber-300 hover:text-white flex items-center gap-1.5 shadow transition-colors cursor-pointer"
+              title="Baixar arquivo de backup da sessão (.json) no seu computador"
+            >
+              <Download className="w-4 h-4 text-amber-400" />
+              <span>Salvar Backup</span>
+            </button>
+
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="px-4 py-2.5 rounded-lg text-xs font-bold bg-[#140b1e] hover:bg-purple-950 border-2 border-purple-600 text-purple-300 hover:text-white flex items-center gap-1.5 shadow transition-colors cursor-pointer"
+              title="Restaurar a sessão a partir de um arquivo .json salvo no seu PC"
+            >
+              <Upload className="w-4 h-4 text-purple-400" />
+              <span>Carregar Backup</span>
+            </button>
+
             {/* Combat Instance Controls */}
             <button
               onClick={handleAdvanceTurn}

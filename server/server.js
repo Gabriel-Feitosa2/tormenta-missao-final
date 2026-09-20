@@ -394,6 +394,17 @@ io.on('connection', (socket) => {
     callback({ success: true });
   });
 
+  // Import / Restore Session Backup
+  socket.on('import_session', ({ sessionData }, callback) => {
+    try {
+      stateManager.importState(sessionData);
+      io.emit('state_update', stateManager.getState());
+      if (callback) callback({ success: true });
+    } catch (err) {
+      if (callback) callback({ success: false, message: err.message });
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log(`[Socket] Cliente desconectado: ${socket.id}`);
   });

@@ -245,6 +245,12 @@ export const GameProvider = ({ children }) => {
     });
   };
 
+  const importSession = (sessionData) => {
+    return new Promise((resolve) => {
+      socket.emit('import_session', { sessionData }, resolve);
+    });
+  };
+
   return (
     <GameContext.Provider
       value={{
@@ -279,6 +285,7 @@ export const GameProvider = ({ children }) => {
         rollRizzelenaFood,
         selectLisandraOption,
         resetSession,
+        importSession,
         // Modals
         activeWillTestResult,
         setActiveWillTestResult,
