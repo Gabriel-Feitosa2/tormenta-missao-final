@@ -618,6 +618,78 @@ class StateManager {
     return npc;
   }
 
+  setNpcStatus(npcId, status, reason = "Decreto do Mestre") {
+    const npc = this.state.npcs[npcId];
+    if (!npc) throw new Error("NPC não encontrado.");
+
+    const validStatuses = ["alive", "wounded", "withdrawn", "dead"];
+    if (!validStatuses.includes(status)) {
+      throw new Error(`Status inválido: ${status}. Deve ser um de: ${validStatuses.join(", ")}`);
+    }
+
+    const prevStatus = npc.status;
+    npc.status = status;
+
+    if (status === "dead") {
+      npc.willFailures = 3;
+      npc.usedThisRound = false;
+    } else if (status === "alive") {
+      if (npc.willFailures >= 3) {
+        npc.willFailures = 0;
+      }
+    } else if (status === "wounded") {
+      if (npc.willFailures >= 3) {
+        npc.willFailures = 2;
+      }
+      npc.usedThisRound = false;
+    } else if (status === "withdrawn") {
+      if (npc.willFailures >= 3) {
+        npc.willFailures = 2;
+      }
+      npc.usedThisRound = false;
+    }
+
+    const statusLabels = {
+      alive: "ATIVO",
+      wounded: "FERIDO",
+      withdrawn: "SALVO",
+      dead: "MORTO",
+    };
+
+    const logTypes = {
+      dead: "damage",
+      wounded: "injury",
+      withdrawn: "heal",
+      alive: "heal",
+    };
+
+    const severities = {
+      dead: "danger",
+      wounded: "warning",
+      withdrawn: "info",
+      alive: "success",
+    };
+
+    this.addLog({
+      type: logTypes[status] || "system",
+      severity: severities[status] || "info",
+      title: `Status Alterado (${statusLabels[status]})`,
+      message: `${npc.name} teve seu status alterado de ${statusLabels[prevStatus] || prevStatus} para ${statusLabels[status]} pelo Mestre (${reason}).`,
+      details: { npcId, prevStatus, newStatus: status, reason },
+    });
+
+    this.save();
+    return npc;
+  }
+
+  woundNpc(npcId, reason = "Decreto do Mestre") {
+    return this.setNpcStatus(npcId, "wounded", reason);
+  }
+
+  withdrawNpc(npcId, reason = "Decreto do Mestre") {
+    return this.setNpcStatus(npcId, "withdrawn", reason);
+  }
+
   // --- REGRAS DE RESGATE POR CURADOR ---
   rescueWithHealer(curadorId, woundedNpcId, actorName = "Jogador") {
     const curador = this.state.npcs[curadorId];

@@ -178,6 +178,24 @@ export const GameProvider = ({ children }) => {
     });
   };
 
+  const setNpcStatus = (npcId, status, reason = 'Decreto do Mestre') => {
+    return new Promise((resolve) => {
+      socket.emit('set_npc_status', { npcId, status, reason }, resolve);
+    });
+  };
+
+  const woundNpc = (npcId, reason = 'Decreto do Mestre') => {
+    return new Promise((resolve) => {
+      socket.emit('wound_npc', { npcId, reason }, resolve);
+    });
+  };
+
+  const withdrawNpc = (npcId, reason = 'Decreto do Mestre') => {
+    return new Promise((resolve) => {
+      socket.emit('withdraw_npc', { npcId, reason }, resolve);
+    });
+  };
+
   const rescueWithHealer = (curadorId, woundedNpcId) => {
     return new Promise((resolve) => {
       const actorName = currentUser ? currentUser.name : 'Jogador';
@@ -273,6 +291,9 @@ export const GameProvider = ({ children }) => {
         healNpc,
         killNpc,
         reviveNpc,
+        setNpcStatus,
+        woundNpc,
+        withdrawNpc,
         rescueWithHealer,
         rollTurnEndInjury,
         rollCombatWounds,

@@ -132,6 +132,25 @@ async function runTest() {
     throw new Error('Falha ao restaurar backup no StateManager!');
   }
 
+  // 12. Teste Mestre: Deixar NPC Ferido ou Salvo
+  const woundedNpc = stateManager.woundNpc('asora', 'Ataque de Flecha Lefeu');
+  console.log(`✓ Mestre deixou NPC Ferido: ${woundedNpc.name} (Status: ${woundedNpc.status})`);
+  if (woundedNpc.status !== 'wounded') {
+    throw new Error('Falha ao definir status wounded pelo Mestre!');
+  }
+
+  const savedNpc = stateManager.withdrawNpc('asora', 'Intervenção dos Guardas');
+  console.log(`✓ Mestre deixou NPC Salvo: ${savedNpc.name} (Status: ${savedNpc.status})`);
+  if (savedNpc.status !== 'withdrawn') {
+    throw new Error('Falha ao definir status withdrawn pelo Mestre!');
+  }
+
+  const activeNpc = stateManager.setNpcStatus('asora', 'alive', 'Magia de Cura');
+  console.log(`✓ Mestre deixou NPC Ativo novamente: ${activeNpc.name} (Status: ${activeNpc.status})`);
+  if (activeNpc.status !== 'alive') {
+    throw new Error('Falha ao restaurar status alive pelo Mestre!');
+  }
+
   console.log('=== TODOS OS TESTES PASSARAM COM 100% DE SUCESSO! ===');
   process.exit(0);
 }

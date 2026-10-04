@@ -28,6 +28,9 @@ export const NpcCard = ({
     healNpc,
     killNpc,
     reviveNpc,
+    setNpcStatus,
+    woundNpc,
+    withdrawNpc,
     updateNpcFailures,
     updateNpcAvatar,
   } = useGame();
@@ -98,6 +101,27 @@ export const NpcCard = ({
   const handleRevive = async () => {
     if (!isMaster) return;
     await reviveNpc(npc.id, true);
+  };
+
+  const handleWound = async () => {
+    if (!isMaster) return;
+    await setNpcStatus(npc.id, 'wounded', 'Decreto do Mestre');
+  };
+
+  const handleWithdraw = async () => {
+    if (!isMaster) return;
+    await setNpcStatus(npc.id, 'withdrawn', 'Decreto do Mestre');
+  };
+
+  const handleSetStatus = async (newStatus) => {
+    if (!isMaster) return;
+    if (newStatus === 'dead') {
+      await handleKill();
+    } else if (newStatus === 'alive') {
+      await handleRevive();
+    } else {
+      await setNpcStatus(npc.id, newStatus, 'Decreto do Mestre');
+    }
   };
 
   const isDead = npc.status === 'dead' || npc.willFailures >= 3;
@@ -186,7 +210,27 @@ export const NpcCard = ({
 
               {/* Status Badge & Master Quick Action */}
               <div className="flex items-center gap-1.5 shrink-0">
-                {isDead ? (
+                {isMaster ? (
+                  <select
+                    value={isDead ? 'dead' : isWithdrawn ? 'withdrawn' : isWounded ? 'wounded' : 'alive'}
+                    onChange={(e) => handleSetStatus(e.target.value)}
+                    className={`px-2 py-0.5 text-[10px] font-black rounded-md border shadow cursor-pointer uppercase transition-all outline-none font-sans ${
+                      isDead
+                        ? 'bg-red-950 border-red-600 text-red-300'
+                        : isWithdrawn
+                        ? 'bg-blue-950 border-blue-500 text-blue-200'
+                        : isWounded
+                        ? 'bg-amber-950 border-amber-500 text-amber-200 animate-pulse'
+                        : 'bg-emerald-950 border-emerald-600 text-emerald-300'
+                    }`}
+                    title="Mestre: Clique para alterar status deste parceiro"
+                  >
+                    <option value="alive" className="bg-[#18050c] text-emerald-300 font-bold">● ATIVO</option>
+                    <option value="wounded" className="bg-[#18050c] text-amber-300 font-bold">▲ FERIDO</option>
+                    <option value="withdrawn" className="bg-[#18050c] text-blue-300 font-bold">■ SALVO</option>
+                    <option value="dead" className="bg-[#18050c] text-red-400 font-bold">✖ MORTO</option>
+                  </select>
+                ) : isDead ? (
                   <span className="px-2 py-0.5 bg-red-950/90 border border-red-600 text-red-300 text-[10px] font-black rounded-md flex items-center gap-1 shadow">
                     <Skull className="w-3 h-3 text-red-500" /> MORTO
                   </span>
@@ -202,25 +246,6 @@ export const NpcCard = ({
                   <span className="px-2 py-0.5 bg-emerald-950/90 border border-emerald-600 text-emerald-300 text-[10px] font-black rounded-md flex items-center gap-1 shadow">
                     <CheckCircle2 className="w-3 h-3 text-emerald-400" /> ATIVO
                   </span>
-                )}
-
-                {/* Master Quick Kill / Revive Button */}
-                {isMaster && (
-                  <button
-                    onClick={isDead ? handleRevive : handleKill}
-                    className={`p-1 rounded-md border text-xs shadow transition-all cursor-pointer ${
-                      isDead
-                        ? 'bg-emerald-950/90 hover:bg-emerald-800 border-emerald-500 text-emerald-300'
-                        : 'bg-red-950/90 hover:bg-red-900 border-red-600 text-red-400 hover:text-white'
-                    }`}
-                    title={
-                      isDead
-                        ? `Reviver ${npc.name} automaticamente (Mestre)`
-                        : `Matar ${npc.name} automaticamente (Mestre)`
-                    }
-                  >
-                    {isDead ? <Sparkles className="w-3.5 h-3.5" /> : <Skull className="w-3.5 h-3.5" />}
-                  </button>
                 )}
               </div>
             </div>
@@ -349,6 +374,72 @@ export const NpcCard = ({
         </div>
       )}
 
+      {/* Master Status Quick Controls Bar */}
+      {isMaster && (
+        <div className="px-3.5 py-2 bg-[#17050e] border-t border-red-950/80 flex flex-wrap items-center justify-between gap-1.5 select-none">
+          <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 font-medieval flex items-center gap-1 shrink-0">
+            <Shield className="w-3.5 h-3.5 text-amber-500" /> Mestre:
+          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {/* ATIVO */}
+            <button
+              onClick={() => handleSetStatus('alive')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1 border transition-all cursor-pointer ${
+                isAlive
+                  ? 'bg-emerald-600 text-white border-emerald-300 shadow-[0_0_8px_rgba(16,185,129,0.5)] font-black'
+                  : 'bg-emerald-950/40 text-emerald-300/80 border-emerald-800/60 hover:bg-emerald-900/80 hover:text-emerald-100 hover:border-emerald-500'
+              }`}
+              title="Mestre: Definir status como ATIVO (apto a agir no combate)"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Ativo</span>
+            </button>
+
+            {/* FERIDO */}
+            <button
+              onClick={() => handleSetStatus('wounded')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1 border transition-all cursor-pointer ${
+                isWounded
+                  ? 'bg-amber-600 text-white border-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.5)] font-black'
+                  : 'bg-amber-950/40 text-amber-300/80 border-amber-800/60 hover:bg-amber-900/80 hover:text-amber-100 hover:border-amber-500'
+              }`}
+              title="Mestre: Deixar este parceiro FERIDO (fora de combate, aguarda resgate de Curador ou teste de morte)"
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+              <span>Ferido</span>
+            </button>
+
+            {/* SALVO */}
+            <button
+              onClick={() => handleSetStatus('withdrawn')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1 border transition-all cursor-pointer ${
+                isWithdrawn
+                  ? 'bg-blue-600 text-white border-blue-300 shadow-[0_0_8px_rgba(59,130,246,0.5)] font-black'
+                  : 'bg-blue-950/40 text-blue-300/80 border-blue-800/60 hover:bg-blue-900/80 hover:text-blue-100 hover:border-blue-500'
+              }`}
+              title="Mestre: Deixar este parceiro SALVO (resgatado / a salvo de morte neste combate)"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+              <span>Salvo</span>
+            </button>
+
+            {/* MATAR / MORTO */}
+            <button
+              onClick={() => (isDead ? handleRevive() : handleKill())}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1 border transition-all cursor-pointer ${
+                isDead
+                  ? 'bg-red-800 text-white border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.5)] font-black'
+                  : 'bg-red-950/40 text-red-300/80 border-red-900/60 hover:bg-red-900/80 hover:text-red-100 hover:border-red-500'
+              }`}
+              title={isDead ? 'Mestre: Reviver este parceiro' : 'Mestre: Matar este parceiro definitivamente'}
+            >
+              {isDead ? <Sparkles className="w-3.5 h-3.5 text-emerald-300" /> : <Skull className="w-3.5 h-3.5 text-red-400" />}
+              <span>{isDead ? 'Reviver' : 'Matar'}</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Action Footer */}
       <div className="p-3.5 pt-2 bg-[#120509] border-t-2 border-red-950 flex flex-wrap items-center justify-between gap-2.5">
         {/* Left: Turn Checkbox or Status buttons */}
@@ -390,29 +481,6 @@ export const NpcCard = ({
               </button>
             </div>
           ) : null}
-
-          {/* Master Kill / Revive Buttons in Action Footer */}
-          {isMaster && (
-            isDead ? (
-              <button
-                onClick={handleRevive}
-                className="px-3.5 py-1.5 bg-emerald-950 hover:bg-emerald-900 border-2 border-emerald-500 text-emerald-100 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-lg transition-all cursor-pointer"
-                title="Reviver parceiro automaticamente e zerar falhas (Controle de Mestre)"
-              >
-                <Sparkles className="w-4 h-4 text-emerald-300" />
-                <span>Reviver (Mestre)</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleKill}
-                className="px-2.5 py-1.5 bg-red-950/90 hover:bg-red-900 border-2 border-red-600/90 text-red-300 hover:text-white text-xs font-bold rounded-lg flex items-center gap-1 shadow transition-all cursor-pointer"
-                title="Matar este parceiro automaticamente (Controle de Mestre)"
-              >
-                <Skull className="w-3.5 h-3.5 text-red-400" />
-                <span>Matar</span>
-              </button>
-            )
-          )}
         </div>
 
         {/* Right: Attack button and Special Modals */}

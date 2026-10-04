@@ -260,6 +260,39 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Set NPC Status (Master Command: alive, wounded, withdrawn, dead)
+  socket.on('set_npc_status', ({ npcId, status, reason }, callback) => {
+    try {
+      stateManager.setNpcStatus(npcId, status, reason);
+      io.emit('state_update', stateManager.getState());
+      if (callback) callback({ success: true });
+    } catch (err) {
+      if (callback) callback({ success: false, message: err.message });
+    }
+  });
+
+  // Wound NPC (Master Command)
+  socket.on('wound_npc', ({ npcId, reason }, callback) => {
+    try {
+      stateManager.woundNpc(npcId, reason);
+      io.emit('state_update', stateManager.getState());
+      if (callback) callback({ success: true });
+    } catch (err) {
+      if (callback) callback({ success: false, message: err.message });
+    }
+  });
+
+  // Withdraw / Save NPC (Master Command)
+  socket.on('withdraw_npc', ({ npcId, reason }, callback) => {
+    try {
+      stateManager.withdrawNpc(npcId, reason);
+      io.emit('state_update', stateManager.getState());
+      if (callback) callback({ success: true });
+    } catch (err) {
+      if (callback) callback({ success: false, message: err.message });
+    }
+  });
+
   // Rescue with Healer
   socket.on('rescue_with_healer', ({ curadorId, woundedNpcId, actorName }, callback) => {
     try {
